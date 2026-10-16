@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>Вытяни роль</title>
+<style>
+:root{--bg:#f1f0ec;--card:#fbfaf8;--ink:#111;--blue:#0a84ff;--mute:#8a8782}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:-apple-system,"SF Pro Text",Helvetica,Arial,sans-serif}
+body{display:flex;flex-direction:column;align-items:center;padding:20px 16px 28px;gap:14px;overflow-y:auto}
+h1{font-size:26px;margin:4px 0 0;text-align:center}
+.sub{color:var(--mute);font-size:15px;text-align:center;margin:0;max-width:420px}
+.stage{width:100%;max-width:420px;display:flex;flex-direction:column;gap:12px}
+.card{flex:none;background:var(--card);border-radius:34px;padding:22px 20px;display:flex;flex-direction:column;justify-content:center;gap:14px;min-height:340px}
+.back{align-items:center;text-align:center;color:var(--mute);font-size:18px}
+.back .big{font-size:64px}
+.role b,.row b,.extra b{display:block;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);margin-bottom:3px;font-weight:600}
+.role{padding:4px 4px 8px}
+.role span{font-size:40px;font-weight:800;line-height:1.05}
+.main{display:flex;flex-direction:column;gap:9px}
+.row{background:#efeeea;border-radius:18px;padding:11px 14px}
+.row span{font-size:19px;font-weight:500;line-height:1.25}
+.extra{padding:2px 4px}
+.ghost{background:transparent;border:2px solid #dcdad5;color:#444;font-size:16px;padding:12px 18px}
+.ex{background:var(--card);border-radius:28px;padding:18px}
+.exh{font-size:15px;font-weight:600;margin-bottom:10px}
+.grid{display:grid;grid-template-columns:1fr;gap:8px}
+.fr{background:#efeeea;border-radius:16px;padding:10px 12px;display:flex;gap:10px;align-items:baseline}
+.fr i{font-style:normal;font-weight:800;font-size:18px;min-width:18px}
+.fr b{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);font-weight:600}
+.fr span{font-size:15px;line-height:1.3}
+.exn{font-size:13px;color:var(--mute);margin-top:10px}
+@media (min-width:700px){.grid{grid-template-columns:1fr 1fr 1fr}.fr{flex-direction:column;gap:2px}}
+.acts{display:flex;gap:8px;margin-top:8px}
+.mini{padding:6px 12px;font-size:13px;font-weight:500;background:#fff;border:1px solid #dcdad5;color:#444}
+.note b{color:#555;font-weight:600}
+.extra span{font-size:15px;color:#6b6964;font-weight:400;line-height:1.4}
+.note{font-size:14px;color:var(--mute)}
+.hide{display:none}
+@media (min-width:700px){
+.stage{max-width:880px}
+h1{font-size:34px}.sub{font-size:17px;max-width:700px}
+.card{min-height:0;padding:24px 28px}
+.main{flex-direction:row}.main .row{flex:1}
+.role span{font-size:52px}.row span{font-size:22px}.extra span{font-size:16px}
+.back{min-height:300px}
+}
+button{font:inherit;border:0;border-radius:999px;padding:16px 20px;font-size:18px;font-weight:600}
+#draw{background:var(--blue);color:#fff}
+#hold{background:#fff;color:var(--ink);border:2px solid #dcdad5;touch-action:none}
+#hold.on{background:var(--ink);color:#fff}
+.count{text-align:center;color:var(--mute);font-size:13px}
+</style>
+</head>
+<body>
+<h1>Вытяни роль</h1>
+<p class="sub">Сними шесть кадров так, чтобы зритель понял, кто это, без слов.</p>
+<div class="stage">
+  <div class="card back" id="back"><div class="big">?</div><div id="backtxt">Нажми «Тянуть карточку»</div></div>
+  <div class="card hide" id="face">
+    <div class="role"><b>Роль</b><span id="role"></span></div>
+    <div class="main">
+      <div class="row"><b>Что происходит</b><span id="sit"></span>
+        <div class="acts"><button class="mini" id="sitNext">Другая</button></div></div>
+      <div class="row"><b>Последний кадр, деталь</b><span id="item"></span></div>
+    </div>
+    <div class="note"><b>Правила.</b> Шесть кадров, минимум три разные крупности. Последний кадр деталь. Роль вслух не говори.<br><b>Зритель</b> угадывает роль и что случилось, а потом говорит, на каком кадре понял.</div>
+  </div>
+  <button id="draw">Тянуть карточку</button>
+  <button id="exBtn" class="ghost">Пример раскадровки</button>
+  <div class="ex hide" id="ex">
+    <div class="exh" id="exh">Пример: пекарь ищет потерянные ключи</div>
+    <div class="grid" id="exg"></div>
+    <div class="exn">Это один из вариантов, придумай свой. Крупности чередуем через одну: соседние подряд не ставим, кроме деталь с крупным и общий с дальним.</div>
+  </div>
+  <div class="count" id="count"></div>
+</div>
+<script>
+const ROLES=["Часовщик","Фокусник","Библиотекарь","Ветеринар","Садовник","Реставратор","Астроном","Звукорежиссёр","Пожарный","Парикмахер","Археолог","Дрессировщик"];
+const TRAITS=["Очень спешит","Шутит по любому поводу","Держится из последних сил","Обожает своё дело","Держится очень самоуверенно","Немного теряется","Мечтает о перерыве","Хочет всё сделать идеально","Скрывает волнение","Радуется мелочам","Упрямо идёт до конца","Ждёт важного звонка"];
+const SITS=["Ищет потерянные ключи","Опаздывает и бежит изо всех сил","Пролил напиток на важную вещь","Не может открыть заевшую дверь","Ждёт кого-то, а тот не приходит","Телефон сел в самый важный момент","Нашёл в кармане забытую вещь","Несёт хрупкую вещь и боится уронить","Выбирает из двух вариантов и никак не решит","Чинит сломавшуюся вещь","Получил неожиданный подарок","Ищет, откуда идёт странный звук"];
+const FN=["Лена","Ира","Алина","Вера","Соня","Катя","Аня","Маша","Полина","Юля"],MN=["Артём","Саша","Дима","Миша","Тимур","Паша","Егор","Ваня","Макс","Кирилл"];
+const AGE={"Часовщик":[35,70],"Фокусник":[20,55],"Библиотекарь":[25,65],"Ветеринар":[25,55],"Садовник":[25,65],"Реставратор":[28,60],"Астроном":[25,60],"Звукорежиссёр":[22,50],"Пожарный":[23,45],"Парикмахер":[20,55],"Археолог":[25,60],"Дрессировщик":[22,55]};
+const FEM=[];
+const yrs=n=>n+(n%10==1&&n%100!=11?" год":([2,3,4].includes(n%10)&&![12,13,14].includes(n%100)?" года":" лет"));
+const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const hero=r=>{const f=FEM.includes(r)||Math.random()<.5;const L=f?FN:MN;const [a,b]=AGE[r]||[18,45];return L[rnd(0,L.length-1)]+", "+yrs(rnd(a,b))};
+const PLACES=["На остановке","В автобусе","Во дворе дома","В кабинете","В кафе","В магазине","Дома утром","На улице под дождём","В подъезде","В парке"];
+const DET={"Часовщик": ["Шестерёнка", "Лупа у глаза", "Ручные часы"], "Фокусник": ["Колода карт", "Белый платок", "Волшебная палочка"], "Библиотекарь": ["Штамп на книге", "Стопка книг", "Очки на цепочке"], "Ветеринар": ["Градусник", "Лапа с пластырем", "Миска с кормом"], "Садовник": ["Садовые ножницы", "Горшок с ростком", "Грязные перчатки"], "Реставратор": ["Тонкая кисть", "Трещина на картине", "Лупа"], "Астроном": ["Телескоп", "Карта звёздного неба", "Блокнот с созвездиями"], "Звукорежиссёр": ["Наушники", "Микрофон", "Звуковой пульт"], "Пожарный": ["Каска", "Шланг", "Огнетушитель"], "Парикмахер": ["Ножницы", "Расчёска", "Фен"], "Археолог": ["Кисточка в пыли", "Осколок старого горшка", "Лопатка"], "Дрессировщик": ["Лакомство в руке", "Свисток", "Мячик"]};
+const $=id=>document.getElementById(id);
+const shuffle=a=>a.map(v=>[Math.random(),v]).sort((x,y)=>x[0]-y[0]).map(x=>x[1]);
+let pr=[],pt=[],ps=[],pw=[],pp=[],drawn=0;
+const pick=(pool,src)=>{if(!pool.length)pool.push(...shuffle(src));return pool.pop()};
+function show(on){$('face').classList.toggle('hide',!on);$('back').classList.toggle('hide',on)}
+$('draw').onclick=()=>{
+  $('role').textContent=pick(pr,ROLES);
+  $('sit').textContent=pick(ps,SITS);
+  const d=DET[$('role').textContent];$('item').textContent=d[rnd(0,d.length-1)];
+  renderEx($('role').textContent,$('sit').textContent,$('item').textContent);
+  drawn++;
+  $('draw').textContent='Тянуть ещё';
+  $('count').textContent='Вытянуто карточек: '+drawn;
+  show(true);
+};
+$('sitNext').onclick=()=>{$('sit').textContent=pick(ps,SITS);renderEx($('role').textContent,$('sit').textContent,$('item').textContent)};
+const SZ=["дальний", "второй средний", "крупный", "общий", "первый средний", "деталь"];
+const EXR={"Часовщик": ["Мастерская, за столом маленькая фигурка", "Человек склонился над столом", "Сосредоточенное лицо", "Стена с часами, он идёт вдоль неё", "Открывает заднюю крышку часов", "Пинцет держит крошечную шестерёнку"], "Фокусник": ["Сцена, в луче света маленькая фигурка", "Человек разводит руками перед зрителями", "Хитрая улыбка", "Зал аплодирует, он кланяется", "Достаёт платок из рукава", "Колода карт веером в руке"], "Библиотекарь": ["Длинные стеллажи, между ними маленькая фигурка", "Человек ищет книгу на полке", "Лицо в очках над раскрытой книгой", "Читальный зал, он везёт тележку с книгами", "Ставит книгу на место", "Штамп ставит отметку на странице"], "Ветеринар": ["Двор, к клинике идёт человек с переноской", "Человек осматривает питомца на столе", "Внимательный взгляд и улыбка", "Кабинет: стол, весы, клетки", "Гладит питомца по голове", "Лапа с пластырем в ладони"], "Садовник": ["Большой сад, среди грядок маленькая фигурка", "Человек поливает кусты", "Довольное лицо, пот со лба", "Аллея с ровно подстриженными кустами", "Обрезает ветку", "Горшок с ростком в грязных ладонях"], "Реставратор": ["Музейный зал, у стены картина и маленькая фигурка", "Человек склонился над картиной", "Лицо с лупой у глаза", "Мастерская: рамы, баночки, свет лампы", "Берёт тонкую кисть", "Кисть касается трещины на картине"], "Астроном": ["Ночь, на холме маленькая фигурка у телескопа", "Человек смотрит в телескоп", "Лицо, в глазах отражаются звёзды", "Купол обсерватории под небом", "Записывает что-то в блокнот", "Блокнот с нарисованными созвездиями"], "Звукорежиссёр": ["Студия, за стеклом маленькая фигурка", "Человек сидит за пультом", "Лицо в наушниках, прислушивается", "Студия: микрофон, пульт, стекло", "Двигает рычажок на пульте", "Пальцы на рычажках звукового пульта"], "Пожарный": ["Двор пожарной части, красная машина и маленькая фигурка", "Человек надевает форму", "Серьёзное лицо под каской", "Машина выезжает, он бежит к ней", "Берёт шланг", "Перчатка поднимает каску со скамьи"], "Парикмахер": ["Салон, у окна маленькая фигурка у кресла", "Человек стоит за креслом клиента", "Сосредоточенное лицо в зеркале", "Салон: зеркала, кресла, фены", "Расчёсывает волосы клиента", "Ножницы режут прядь волос"], "Археолог": ["Карьер, вдалеке маленькая фигурка", "Человек сидит на корточках у ямы", "Лицо в пыли, удивлённый взгляд", "Раскоп с флажками и ямами", "Осторожно смахивает пыль", "Кисточка над осколком старого горшка"], "Дрессировщик": ["Арена, в центре маленькая фигурка и животное", "Человек стоит перед животным с поднятой рукой", "Спокойное уверенное лицо", "Арена, свет, зрители на трибунах", "Даёт лакомство из руки", "Лакомство на ладони"]};
+const EXD=["Раннее утро, у двери пекарни маленькая фигурка","Человек хлопает по карманам фартука","Растерянное лицо, мука на щеке","Заглядывает под коврик и оглядывает улицу","Находит ключи на подоконнике","Ладонь в муке, в ней ключи"];
+const EXS={"Ищет потерянные ключи": ["Растерянный взгляд, ладонь хлопает по карману", "Оглядывается по сторонам, заглядывает под вещи"], "Опаздывает и бежит изо всех сил": ["Напряжённое лицо, сбитое дыхание", "Бежит через двор, всё вокруг размыто"], "Пролил напиток на важную вещь": ["Испуганные глаза", "Стоит над пятном и хватается за голову"], "Не может открыть заевшую дверь": ["Упрямое лицо, зубы стиснуты", "Тянет дверь изо всех сил, она не поддаётся"], "Ждёт кого-то, а тот не приходит": ["Взгляд на часы, потом в пустоту", "Стоит один, вокруг проходят люди"], "Телефон сел в самый важный момент": ["Растерянное лицо, смотрит на чёрный экран", "Ходит по комнате и ищет розетку"], "Нашёл в кармане забытую вещь": ["Удивлённая улыбка", "Замирает посреди комнаты и разглядывает находку"], "Несёт хрупкую вещь и боится уронить": ["Сосредоточенное лицо, брови сдвинуты", "Идёт очень медленно, шаг за шагом"], "Выбирает из двух вариантов и никак не решит": ["Взгляд бегает с одного на другое", "Стоит между двумя предметами и не двигается"], "Чинит сломавшуюся вещь": ["Прищуренные глаза, язык закушен", "Сидит над разобранной вещью, вокруг детали"], "Получил неожиданный подарок": ["Широкая улыбка, глаза горят", "Стоит с коробкой в руках и оглядывается"], "Ищет, откуда идёт странный звук": ["Настороженное лицо, ухо повёрнуто", "Крадётся по комнате и прислушивается"]};
+function renderEx(role,sit,item){const R=EXR[role];if(!R){const L=EXD;$('exh').textContent='Пример: пекарь ищет потерянные ключи';$('exg').innerHTML=SZ.map((z,i)=>'<div class="fr"><i>'+(i+1)+'</i><div><b>'+z+'</b><span>'+L[i]+'</span></div></div>').join('');return}const S=EXS[sit]||[R[2],R[3]];const L=[R[0],R[1],S[0],S[1],R[4],item||R[5]];$('exh').textContent='Пример под твою карточку: '+role.toLowerCase()+', '+sit.toLowerCase();$('exg').innerHTML=SZ.map((z,i)=>'<div class="fr"><i>'+(i+1)+'</i><div><b>'+z+'</b><span>'+L[i]+'</span></div></div>').join('')}
+renderEx();
+$('exBtn').onclick=()=>{const h=$('ex').classList.toggle('hide');$('exBtn').textContent=h?'Пример раскадровки':'Скрыть пример'};
+document.addEventListener('contextmenu',e=>e.preventDefault());
+</script>
+</body>
+</html>
